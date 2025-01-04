@@ -1,3 +1,4 @@
 flask
 pyngrok
 youtube-transcript-api
+gunicorn
