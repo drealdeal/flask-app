@@ -2,7 +2,8 @@
 
 from flask import Flask, request, jsonify, render_template
 from youtube_transcript_api import YouTubeTranscriptApi
-# from pyngrok import ngrok  # <- Not needed on Render
+from pyngrok import ngrok
+import os
 
 app = Flask(__name__)
 
@@ -49,8 +50,22 @@ def process_url():
         return jsonify({"error": str(e)}), 500
 
 if __name__ == '__main__':
-    # For local dev only; Render uses Gunicorn
-    # If you are testing locally, you can do:
-    #   python yt_scraper.py
-    # and it will run on http://localhost:5000
-    app.run(host="0.0.0.0", port=5000)
+    # Check if running locally (not on Render or other cloud platform)
+    if os.environ.get('RENDER') or os.environ.get('DYNO'):
+        # Running on cloud platform - use Gunicorn
+        app.run(host="0.0.0.0", port=5000)
+    else:
+        # Running locally - use ngrok for easy mobile access
+        port = 5000
+
+        # Start ngrok tunnel
+        public_url = ngrok.connect(port)
+        print("\n" + "="*60)
+        print("🎮 SUPER MARIO GAME - READY TO PLAY!")
+        print("="*60)
+        print(f"\n📱 Open this URL on your iPhone:")
+        print(f"\n   {public_url}\n")
+        print("="*60 + "\n")
+
+        # Run Flask app
+        app.run(host="0.0.0.0", port=port)
