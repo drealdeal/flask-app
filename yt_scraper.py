@@ -1,10 +1,14 @@
 # yt_scraper.py
 
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, render_template
 from youtube_transcript_api import YouTubeTranscriptApi
 # from pyngrok import ngrok  # <- Not needed on Render
 
 app = Flask(__name__)
+
+@app.route('/')
+def home():
+    return render_template('mario.html')
 
 @app.route('/webhook', methods=['POST'])
 def process_url():
