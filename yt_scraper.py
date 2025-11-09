@@ -55,17 +55,32 @@ if __name__ == '__main__':
         # Running on cloud platform - use Gunicorn
         app.run(host="0.0.0.0", port=5000)
     else:
-        # Running locally - use ngrok for easy mobile access
+        # Running locally
         port = 5000
 
-        # Start ngrok tunnel
-        public_url = ngrok.connect(port)
-        print("\n" + "="*60)
+        # Try to use ngrok for mobile access (optional)
+        use_ngrok = os.environ.get('USE_NGROK', 'false').lower() == 'true'
+
+        if use_ngrok:
+            try:
+                # Start ngrok tunnel
+                public_url = ngrok.connect(port)
+                print("\n" + "="*60)
+                print("🎮 SUPER MARIO GAME - READY TO PLAY!")
+                print("="*60)
+                print(f"\n📱 Open this URL on your iPhone:")
+                print(f"\n   {public_url}\n")
+                print("="*60 + "\n")
+            except Exception as e:
+                print(f"⚠️  Could not start ngrok: {e}")
+                print("Playing locally instead...\n")
+
+        print("="*60)
         print("🎮 SUPER MARIO GAME - READY TO PLAY!")
         print("="*60)
-        print(f"\n📱 Open this URL on your iPhone:")
-        print(f"\n   {public_url}\n")
+        print(f"\n🖥️  Open this URL in Chrome on your Mac:")
+        print(f"\n   http://localhost:{port}\n")
         print("="*60 + "\n")
 
         # Run Flask app
-        app.run(host="0.0.0.0", port=port)
+        app.run(host="0.0.0.0", port=port, debug=True)
