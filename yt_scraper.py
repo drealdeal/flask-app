@@ -1,10 +1,15 @@
 # yt_scraper.py
 
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, render_template
 from youtube_transcript_api import YouTubeTranscriptApi
-# from pyngrok import ngrok  # <- Not needed on Render
+from pyngrok import ngrok
+import os
 
 app = Flask(__name__)
+
+@app.route('/')
+def home():
+    return render_template('mario.html')
 
 @app.route('/webhook', methods=['POST'])
 def process_url():
@@ -45,8 +50,37 @@ def process_url():
         return jsonify({"error": str(e)}), 500
 
 if __name__ == '__main__':
-    # For local dev only; Render uses Gunicorn
-    # If you are testing locally, you can do:
-    #   python yt_scraper.py
-    # and it will run on http://localhost:5000
-    app.run(host="0.0.0.0", port=5000)
+    # Check if running locally (not on Render or other cloud platform)
+    if os.environ.get('RENDER') or os.environ.get('DYNO'):
+        # Running on cloud platform - use Gunicorn
+        app.run(host="0.0.0.0", port=5000)
+    else:
+        # Running locally
+        port = 5000
+
+        # Try to use ngrok for mobile access (optional)
+        use_ngrok = os.environ.get('USE_NGROK', 'false').lower() == 'true'
+
+        if use_ngrok:
+            try:
+                # Start ngrok tunnel
+                public_url = ngrok.connect(port)
+                print("\n" + "="*60)
+                print("🎮 SUPER MARIO GAME - READY TO PLAY!")
+                print("="*60)
+                print(f"\n📱 Open this URL on your iPhone:")
+                print(f"\n   {public_url}\n")
+                print("="*60 + "\n")
+            except Exception as e:
+                print(f"⚠️  Could not start ngrok: {e}")
+                print("Playing locally instead...\n")
+
+        print("="*60)
+        print("🎮 SUPER MARIO GAME - READY TO PLAY!")
+        print("="*60)
+        print(f"\n🖥️  Open this URL in Chrome on your Mac:")
+        print(f"\n   http://localhost:{port}\n")
+        print("="*60 + "\n")
+
+        # Run Flask app
+        app.run(host="0.0.0.0", port=port, debug=True)
